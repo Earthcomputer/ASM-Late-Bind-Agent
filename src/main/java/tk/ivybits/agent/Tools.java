@@ -17,7 +17,7 @@ public class Tools {
     private static final String NIX_DIR = "linux/";
     private static final String MAC_DIR = "mac/";
     private static final String SOLARIS_DIR = "solaris/";
-    private static final String CACHE_DIR = System.getProperty("java.io.tmpdir") + File.separatorChar + "agentcache.0.0_" + REV;
+    public static String CACHE_DIR = System.getProperty("java.io.tmpdir") + File.separatorChar + "agentcache.0.0_" + REV;
 
     /**
      * Gets the current JVM PID.
