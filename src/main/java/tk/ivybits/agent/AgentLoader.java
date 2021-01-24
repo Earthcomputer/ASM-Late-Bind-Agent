@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.function.Consumer;
 import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
 import java.util.jar.JarEntry;
@@ -28,6 +29,7 @@ public class AgentLoader {
      * Loads an agent into a JVM.
      *
      * @param agent     The main agent class.
+     * @param extraManifestAttributes  Extra manifest attributes
      * @param resources Array of classes to be included with agent.
      * @param pid       The ID of the target JVM.
      * @throws IOException
@@ -35,11 +37,11 @@ public class AgentLoader {
      * @throws AgentLoadException
      * @throws AgentInitializationException
      */
-    public static void attachAgentToJVM(String pid, Class agent, Class... resources)
+    public static void attachAgentToJVM(String pid, Class agent, Consumer<Attributes> extraManifestAttributes, Class... resources)
             throws IOException, AttachNotSupportedException, AgentLoadException, AgentInitializationException {
 
         VirtualMachine vm = VirtualMachine.attach(pid);
-        vm.loadAgent(generateAgentJar(agent, resources).getAbsolutePath());
+        vm.loadAgent(generateAgentJar(agent, extraManifestAttributes, resources).getAbsolutePath());
         vm.detach();
     }
 
@@ -47,12 +49,13 @@ public class AgentLoader {
      * Generates a temporary agent file to be loaded.
      *
      * @param agent     The main agent class.
+     * @param extraManifestAttributes  Extra manifest attributes
      * @param resources Array of classes to be included with agent.
      * @return Returns a temporary jar file with the specified classes included.
      * @throws FileNotFoundException
      * @throws IOException
      */
-    public static File generateAgentJar(Class agent, Class... resources) throws IOException {
+    public static File generateAgentJar(Class agent, Consumer<Attributes> extraManifestAttributes, Class... resources) throws IOException {
         File jarFile = File.createTempFile("agent", ".jar");
         jarFile.deleteOnExit();
 
@@ -63,6 +66,7 @@ public class AgentLoader {
         mainAttributes.put(new Name("Agent-Class"), agent.getName());
         mainAttributes.put(new Name("Can-Retransform-Classes"), "true");
         mainAttributes.put(new Name("Can-Redefine-Classes"), "true");
+        extraManifestAttributes.accept(mainAttributes);
 
         JarOutputStream jos = new JarOutputStream(new FileOutputStream(jarFile), manifest);
 
