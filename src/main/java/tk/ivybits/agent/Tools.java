@@ -140,8 +140,9 @@ public class Tools {
 
     private static void unpack(String path) {
         try {
-            System.out.println(NATIVE_DIR + ((Platform.is64Bit() || Platform.getPlatform() == Platform.MAC) ? "64/" : "32/") + path);
-            URL url = ClassLoader.getSystemResource(NATIVE_DIR + ((Platform.is64Bit() || Platform.getPlatform() == Platform.MAC) ? "64/" : "32/") + path);
+            String resourcePath = "/" + NATIVE_DIR + ((Platform.is64Bit() || Platform.getPlatform() == Platform.MAC) ? "64/" : "32/") + path;
+            System.out.println("Loading native attach library: " + resourcePath);
+            URL url = Tools.class.getResource(resourcePath);
 
             File pathDir = new File(CACHE_DIR);
             pathDir.mkdirs();
